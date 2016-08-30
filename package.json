@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "./node_modules/.bin/nodemon --watch src --ignore src/bundle.js --exec \"npm run build && npm run serve\"",
-    "serve": "./node_modules/.bin/http-server src",
+    "dev": "nodemon --watch src --ignore src/bundle.js --exec \"npm run build && npm run serve\"",
+    "serve": "http-server src",
     "build": "npm run build:js",
-    "build:js": "./node_modules/.bin/webpack",
-    "deploy": "./node_modules/.bin/gh-pages -d src",
+    "build:js": "webpack",
+    "deploy": "gh-pages -d src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
