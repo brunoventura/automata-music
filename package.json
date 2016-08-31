@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --watch src --ignore src/bundle.js --exec \"npm run build && npm run serve\"",
+    "dev": "nodemon --watch src --watch lib  --ignore src/bundle.js --exec \"npm run build && npm run serve\"",
     "serve": "http-server src",
     "build": "npm run build:js",
     "build:js": "webpack",
