@@ -184,7 +184,6 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	console.log(_blues2.default);
 	var synth = new Tone.PolySynth(4, Tone.Synth).toMaster();
 
 	var octave = 4;
