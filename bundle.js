@@ -50,30 +50,24 @@
 
 	var _automata2 = _interopRequireDefault(_automata);
 
-	var _render = __webpack_require__(2);
+	var _render = __webpack_require__(3);
 
 	var _render2 = _interopRequireDefault(_render);
 
-	var _rules = __webpack_require__(3);
-
-	var _midi = __webpack_require__(5);
-
-	var _midi2 = _interopRequireDefault(_midi);
+	var _rules = __webpack_require__(4);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	console.log(_rules.r110);
 
 	var render = new _render2.default(100, 100);
 	var world = new _automata2.default(100, 100, _rules.r110, render);
 	world.start();
 	setInterval(function () {
 	    world.renderNextLine();
-	}, 50);
+	}, 200);
 
 /***/ },
 /* 1 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -82,6 +76,12 @@
 	});
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _audio = __webpack_require__(2);
+
+	var _audio2 = _interopRequireDefault(_audio);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -141,6 +141,7 @@
 	                return null;
 	            }
 
+	            (0, _audio2.default)(this.world[this.pointer.line]);
 	            this.world[this.pointer.line].forEach(function () {
 	                _this2.renderNextCell();
 	            });
@@ -169,6 +170,34 @@
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	var synth = new Tone.PolySynth(4, Tone.Synth).toMaster();
+
+	var notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
+	var octave = 4;
+
+	var playNote = function playNote(line) {
+	    var init = line.length / 2 - 6;
+	    var end = line.length / 2 + 6;
+	    var chord = line.slice(init, end).reduce(function (array, cell, i) {
+	        if (cell) {
+	            array.push('' + notes[i] + octave);
+	        }
+	        return array;
+	    }, []);
+	    synth.triggerAttackRelease(chord, "2n");
+	};
+
+	exports.default = playNote;
+
+/***/ },
+/* 3 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -207,7 +236,7 @@
 	exports.default = Render;
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -217,7 +246,7 @@
 	});
 	exports.r110 = undefined;
 
-	var _ = __webpack_require__(4);
+	var _ = __webpack_require__(5);
 
 	var _2 = _interopRequireDefault(_);
 
@@ -226,7 +255,7 @@
 	exports.r110 = _2.default;
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -247,19 +276,6 @@
 	};
 
 	exports.default = r110;
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	(navigator.requestMIDIAccess() || Promise.reject()).then(function (access) {
-	    var outputs = access.outputs();
-	    outputs.forEach(function (output) {
-	        output.send([0x90, 3, 32]);
-	    });
-	});
 
 /***/ }
 /******/ ]);
