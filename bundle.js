@@ -63,7 +63,7 @@
 	world.start();
 	setInterval(function () {
 	    world.renderNextLine();
-	}, 180);
+	}, 400);
 
 /***/ },
 /* 1 */
