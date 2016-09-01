@@ -61,9 +61,30 @@
 	var render = new _render2.default(100, 200);
 	var world = new _automata2.default(100, 200, _rules.r110, render);
 	world.start();
-	setInterval(function () {
-	    world.renderNextLine();
-	}, 400);
+	var speed = document.querySelector("#speed");
+
+	var timer = function timer(time) {
+	    setTimeout(function () {
+	        world.renderNextLine();
+	        timer(speed.value);
+	    }, time);
+	};
+	timer(speed.value);
+
+	// const listener = function() {
+	//     window.requestAnimationFrame(function() {
+	//         setInterval(function () {
+	//         }, speed.value);
+	//     });
+	// };
+
+	speed.addEventListener("mousedown", function () {
+	    listener();
+	    speed.addEventListener("mousemove", listener);
+	});
+	speed.addEventListener("mouseup", function () {
+	    speed.removeEventListener("mousemove", listener);
+	});
 
 /***/ },
 /* 1 */
