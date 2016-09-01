@@ -63,13 +63,20 @@
 	world.start();
 	var speed = document.querySelector("#speed");
 
-	var listener = function listener() {
-	    window.requestAnimationFrame(function () {
-	        setInterval(function () {
-	            world.renderNextLine();
-	        }, speed.value);
-	    });
+	var timer = function timer(time) {
+	    setTimeout(function () {
+	        world.renderNextLine();
+	        timer(speed.value);
+	    }, time);
 	};
+	timer(speed.value);
+
+	// const listener = function() {
+	//     window.requestAnimationFrame(function() {
+	//         setInterval(function () {
+	//         }, speed.value);
+	//     });
+	// };
 
 	speed.addEventListener("mousedown", function () {
 	    listener();
