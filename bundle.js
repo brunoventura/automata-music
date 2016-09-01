@@ -50,20 +50,20 @@
 
 	var _automata2 = _interopRequireDefault(_automata);
 
-	var _render = __webpack_require__(3);
+	var _render = __webpack_require__(5);
 
 	var _render2 = _interopRequireDefault(_render);
 
-	var _rules = __webpack_require__(4);
+	var _rules = __webpack_require__(6);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var render = new _render2.default(100, 100);
-	var world = new _automata2.default(100, 100, _rules.r110, render);
+	var render = new _render2.default(100, 200);
+	var world = new _automata2.default(100, 200, _rules.r110, render);
 	world.start();
 	setInterval(function () {
 	    world.renderNextLine();
-	}, 200);
+	}, 180);
 
 /***/ },
 /* 1 */
@@ -141,7 +141,7 @@
 	                return null;
 	            }
 
-	            (0, _audio2.default)(this.world[this.pointer.line]);
+	            (0, _audio2.default)(this.world[this.pointer.line], this.pointer.line);
 	            this.world[this.pointer.line].forEach(function () {
 	                _this2.renderNextCell();
 	            });
@@ -170,6 +170,49 @@
 
 /***/ },
 /* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _minor = __webpack_require__(3);
+
+	var _minor2 = _interopRequireDefault(_minor);
+
+	var _chord = __webpack_require__(4);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var synth = new Tone.PolySynth(4, Tone.Synth).toMaster();
+	var time = 4;
+	var currentProgression = void 0;
+
+	var progression = [[0, 4, 5, 3], [0, 3, 4, 0], [0, 3, 0, 4], [0, 3, 4, 0], [3, 4, 0, 2], [3, 4, 0, 5], [3, 4, 1, 2], [3, 4, 1, 5]];
+
+	var playNote = function playNote(line, offset) {
+	    var init = line.length / 2 - 2;
+	    var end = line.length / 2 + 1;
+	    var index = parseInt(line.slice(init, end).join(''), 2);
+	    synth.set("volume", -12);
+	    synth.triggerAttackRelease(_minor2.default[1][index], "2n");
+	    if (offset % time === 0) {
+	        if (offset % (time * 4) === 0) {
+	            console.log(index);
+	            currentProgression = index;
+	        }
+
+	        synth.set("volume", 0);
+	        synth.triggerAttackRelease((0, _chord.triad)(_minor2.default[0], progression[currentProgression][offset / time % time]), time + 'n');
+	    }
+	};
+
+	exports.default = playNote;
+
+/***/ },
+/* 3 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -177,27 +220,27 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	var synth = new Tone.PolySynth(4, Tone.Synth).toMaster();
+	var scales = [["C3", "D3", "Eb3", "F3", "G3", "A3", "B3", "C4"], ["C5", "D5", "Eb5", "F5", "G5", "A5", "B5", "C6"]];
 
-	var notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
-	var octave = 4;
-
-	var playNote = function playNote(line) {
-	    var init = line.length / 2 - 6;
-	    var end = line.length / 2 + 6;
-	    var chord = line.slice(init, end).reduce(function (array, cell, i) {
-	        if (cell) {
-	            array.push('' + notes[i] + octave);
-	        }
-	        return array;
-	    }, []);
-	    synth.triggerAttackRelease(chord, "2n");
-	};
-
-	exports.default = playNote;
+	exports.default = scales;
 
 /***/ },
-/* 3 */
+/* 4 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	var triad = function triad(scale, tonic) {
+	    return [scale[tonic], scale[(tonic + 2) % scale.length], scale[(tonic + 4) % scale.length]];
+	};
+
+	exports.triad = triad;
+
+/***/ },
+/* 5 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -236,7 +279,7 @@
 	exports.default = Render;
 
 /***/ },
-/* 4 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -246,7 +289,7 @@
 	});
 	exports.r110 = undefined;
 
-	var _ = __webpack_require__(5);
+	var _ = __webpack_require__(7);
 
 	var _2 = _interopRequireDefault(_);
 
@@ -255,7 +298,7 @@
 	exports.r110 = _2.default;
 
 /***/ },
-/* 5 */
+/* 7 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -264,11 +307,11 @@
 	    value: true
 	});
 	var r110 = function r110(cell, right, left) {
-	    if (cell && left && right) {
+	    if (left && cell && right) {
 	        return 0;
-	    } else if (!cell && left && right) {
+	    } else if (left && !cell && right) {
 	        return 1;
-	    } else if (!cell && !left && right) {
+	    } else if (!left && !cell && right) {
 	        return 1;
 	    } else {
 	        return cell;
