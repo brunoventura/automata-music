@@ -50,11 +50,11 @@
 
 	var _automata2 = _interopRequireDefault(_automata);
 
-	var _render = __webpack_require__(4);
+	var _render = __webpack_require__(5);
 
 	var _render2 = _interopRequireDefault(_render);
 
-	var _rules = __webpack_require__(5);
+	var _rules = __webpack_require__(6);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -63,7 +63,7 @@
 	world.start();
 	setInterval(function () {
 	    world.renderNextLine();
-	}, 600);
+	}, 200);
 
 /***/ },
 /* 1 */
@@ -141,7 +141,7 @@
 	                return null;
 	            }
 
-	            (0, _audio2.default)(this.world[this.pointer.line]);
+	            (0, _audio2.default)(this.world[this.pointer.line], this.pointer.line);
 	            this.world[this.pointer.line].forEach(function () {
 	                _this2.renderNextCell();
 	            });
@@ -178,28 +178,30 @@
 	    value: true
 	});
 
-	var _blues = __webpack_require__(3);
+	var _minor = __webpack_require__(3);
 
-	var _blues2 = _interopRequireDefault(_blues);
+	var _minor2 = _interopRequireDefault(_minor);
+
+	var _chord = __webpack_require__(4);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var synth = new Tone.PolySynth(4, Tone.Synth).toMaster();
+	var time = 4;
 
-	var octave = 4;
+	var progression = [0, 4, 5, 3];
+	var playNote = function playNote(line, offset) {
+	    var init = line.length / 2 - 2;
+	    var end = line.length / 2 + 1;
+	    var index = parseInt(line.slice(init, end).join(''), 2);
 
-	var playNote = function playNote(line) {
-	    var init = line.length / 2 - 3;
-	    var end = line.length / 2 + 3;
-	    var chords = line.slice(init, end).reduce(function (array, cell, i) {
-	        if (cell) {
-	            array.push(_blues2.default[i]);
-	        }
-	        return array;
-	    }, []);
-	    chords.forEach(function (chord) {
-	        synth.triggerAttackRelease(chord, "2n");
-	    });
+	    console.log(synth);
+	    synth.set("volume", -12);
+	    synth.triggerAttackRelease(_minor2.default[1][index], "2n");
+	    if (offset % time === 0) {
+	        synth.set("volume", 0);
+	        synth.triggerAttackRelease((0, _chord.triad)(_minor2.default[0], progression[offset / time % time]), time + 'n');
+	    }
 	};
 
 	exports.default = playNote;
@@ -213,12 +215,27 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	var chords = [["C#3", "E3", "F#3", "G3", "G#3", "B4", "C#4"], ["C3", "E#3", "F4", "F#4", "G4", "B#4", "C4"], ["D3", "F3", "G3", "G#3", "A4", "B54", "C4"], ["D#3", "F#3", "G#4", "A4", "A#4", "C#4", "D#4"], ["E3", "G3", "A4", "A#4", "B4", "D4", "E4"], ["F3", "A#4", "B#4", "B4", "C4", "Eb4", "F4"], ["F#3", "A4", "B4", "C4", "C#4", "E4", "F4"], ["G3", "Bb4", "C4", "C#4", "D4", "F4", "G4"], ["G#3", "B4", "C#4", "D4", "D#4", "F#4", "G#4"], ["A4", "C4", "D4", "D#4", "E4", "G4", "A5"], ["A#4", "C#4", "D#4", "E4", "E#4", "G#4", "A#5"], ["B4", "D4", "E4", "F4", "F#4", "A5", "B5"]];
+	var scales = [["C3", "D3", "Eb3", "F3", "G3", "A3", "B3", "C4"], ["C5", "D5", "Eb5", "F5", "G5", "A5", "B5", "C6"]];
 
-	exports.default = chords;
+	exports.default = scales;
 
 /***/ },
 /* 4 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	var triad = function triad(scale, tonic) {
+	    return [scale[tonic], scale[(tonic + 2) % scale.length], scale[(tonic + 4) % scale.length]];
+	};
+
+	exports.triad = triad;
+
+/***/ },
+/* 5 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -257,7 +274,7 @@
 	exports.default = Render;
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -267,7 +284,7 @@
 	});
 	exports.r110 = undefined;
 
-	var _ = __webpack_require__(6);
+	var _ = __webpack_require__(7);
 
 	var _2 = _interopRequireDefault(_);
 
@@ -276,7 +293,7 @@
 	exports.r110 = _2.default;
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	'use strict';
