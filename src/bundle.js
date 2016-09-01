@@ -58,12 +58,12 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var render = new _render2.default(100, 100);
-	var world = new _automata2.default(100, 100, _rules.r110, render);
+	var render = new _render2.default(100, 200);
+	var world = new _automata2.default(100, 200, _rules.r110, render);
 	world.start();
 	setInterval(function () {
 	    world.renderNextLine();
-	}, 200);
+	}, 180);
 
 /***/ },
 /* 1 */
@@ -188,19 +188,24 @@
 
 	var synth = new Tone.PolySynth(4, Tone.Synth).toMaster();
 	var time = 4;
+	var currentProgression = void 0;
 
-	var progression = [0, 4, 5, 3];
+	var progression = [[0, 4, 5, 3], [0, 3, 4, 0], [0, 3, 0, 4], [0, 3, 4, 0], [3, 4, 0, 2], [3, 4, 0, 5], [3, 4, 1, 2], [3, 4, 1, 5]];
+
 	var playNote = function playNote(line, offset) {
 	    var init = line.length / 2 - 2;
 	    var end = line.length / 2 + 1;
 	    var index = parseInt(line.slice(init, end).join(''), 2);
-
-	    console.log(synth);
 	    synth.set("volume", -12);
 	    synth.triggerAttackRelease(_minor2.default[1][index], "2n");
 	    if (offset % time === 0) {
+	        if (offset % (time * 4) === 0) {
+	            console.log(index);
+	            currentProgression = index;
+	        }
+
 	        synth.set("volume", 0);
-	        synth.triggerAttackRelease((0, _chord.triad)(_minor2.default[0], progression[offset / time % time]), time + 'n');
+	        synth.triggerAttackRelease((0, _chord.triad)(_minor2.default[0], progression[currentProgression][offset / time % time]), time + 'n');
 	    }
 	};
 
@@ -302,11 +307,11 @@
 	    value: true
 	});
 	var r110 = function r110(cell, right, left) {
-	    if (cell && left && right) {
+	    if (left && cell && right) {
 	        return 0;
-	    } else if (!cell && left && right) {
+	    } else if (left && !cell && right) {
 	        return 1;
-	    } else if (!cell && !left && right) {
+	    } else if (!left && !cell && right) {
 	        return 1;
 	    } else {
 	        return cell;
