@@ -59,7 +59,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var render = new _render2.default(100, 200);
-	var world = new _automata2.default(100, 200, _rules.r110, render);
+	var world = new _automata2.default(100, null, _rules.r110, render);
 	world.start();
 	var speed = document.querySelector("#speed");
 
@@ -70,21 +70,6 @@
 	    }, time);
 	};
 	timer(speed.value);
-
-	// const listener = function() {
-	//     window.requestAnimationFrame(function() {
-	//         setInterval(function () {
-	//         }, speed.value);
-	//     });
-	// };
-
-	speed.addEventListener("mousedown", function () {
-	    listener();
-	    speed.addEventListener("mousemove", listener);
-	});
-	speed.addEventListener("mouseup", function () {
-	    speed.removeEventListener("mousemove", listener);
-	});
 
 /***/ },
 /* 1 */
@@ -107,38 +92,34 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Automata = function () {
-	    function Automata(cells, lines, rule, render) {
+	    function Automata(cellsLength, linesLength, rule, render) {
 	        _classCallCheck(this, Automata);
 
-	        this.world = this.createWorld(cells, lines);
+	        this.world = [];
 	        this.rule = rule;
 	        this.render = render;
 	        this.pointer = {
 	            line: 0,
 	            cell: 0
 	        };
+
+	        this.boundaries = {
+	            cellsLength: cellsLength,
+	            linesLength: linesLength
+	        };
 	    }
 
 	    _createClass(Automata, [{
-	        key: 'createWorld',
-	        value: function createWorld(cells, lines) {
-	            var world = [];
-	            for (var i = 0; i < lines; i++) {
-	                world.push(new Uint8Array(cells));
-	            }
-	            return world;
-	        }
-	    }, {
 	        key: 'start',
 	        value: function start() {
 	            var seed = arguments.length <= 0 || arguments[0] === undefined ? this.randomSeed() : arguments[0];
 
-	            this.world[0] = seed;
+	            this.world.push(seed);
 	        }
 	    }, {
 	        key: 'randomSeed',
 	        value: function randomSeed() {
-	            return this.world[0].map(function (cell) {
+	            return new Uint8Array(this.boundaries.cellsLength).map(function (cell) {
 	                return Math.random() >= 0.5 ? 1 : 0;
 	            });
 	        }
@@ -147,11 +128,11 @@
 	        value: function generateLine(line) {
 	            var _this = this;
 
-	            this.world[line - 1].forEach(function (cell, i) {
+	            this.world.push(this.world[line - 1].map(function (cell, i) {
 	                var right = _this.world[line - 1][i + 1] || 0;
 	                var left = _this.world[line - 1][i - 1] || 0;
-	                _this.world[line][i] = _this.rule(cell, right, left);
-	            });
+	                return _this.rule(cell, right, left);
+	            }));
 	        }
 	    }, {
 	        key: 'renderNextLine',
@@ -170,11 +151,11 @@
 	    }, {
 	        key: 'renderNextCell',
 	        value: function renderNextCell() {
-	            if (this.pointer.line >= this.world.length) {
+	            if (this.boundaries.linesLength && this.pointer.line >= this.boundaries.linesLength) {
 	                return null;
 	            }
 
-	            if (this.pointer.cell >= this.world[0].length) {
+	            if (this.pointer.cell >= this.boundaries.cellsLength) {
 	                this.pointer.line++;
 	                this.generateLine(this.pointer.line);
 	                this.pointer.cell = 0;
@@ -219,9 +200,9 @@
 	    var index = parseInt(line.slice(init, end).join(''), 2);
 	    synth.set("volume", -12);
 	    synth.triggerAttackRelease(_minor2.default[1][index], "2n");
+
 	    if (offset % time === 0) {
 	        if (offset % (time * 4) === 0) {
-	            console.log(index);
 	            currentProgression = index;
 	        }
 
