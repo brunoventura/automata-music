@@ -194,13 +194,13 @@
 	        value: function renderLine(line) {
 	            var _this = this;
 
-	            if (this.linePointer > this.totalLines) {
+	            if (this.linePointer >= this.totalLines) {
 	                this.shiftContext.call(this, this.worldCanvas.width, this.worldCanvas.height, 0, -CELL_WIDTH);
 	                this.linePointer = this.totalLines - 1;
 	            }
 
 	            line.forEach(function (value, cell) {
-
+	                console.log(_this.linePointer);
 	                _this.ctx.fillStyle = value ? '#000' : '#FFF';
 	                _this.ctx.fillRect(cell * CELL_WIDTH, _this.linePointer * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
 	            });
