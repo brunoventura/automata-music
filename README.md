@@ -1,6 +1,6 @@
 # Automata Music
 
-The project is a Cellular Automata who generates Non-deterministic music. They be concepted @ BrazilJS 2016 to be a blend of some talks.
+This application generates non-deterministic music based on a Cellular Automata algorithm. This project was conceived @ BrazilJS 2016 inspired by some talks.
 
 # Installation
 
@@ -9,7 +9,7 @@ npm install
 ```
 
 # Development
-This task will run nodemon, and compile js to browser when something modify.
+This task will run nodemon, and compile js to browser when something is modified.
 ```
 npm run dev
 ```
@@ -20,7 +20,7 @@ npm run dev
 2. Create music based on the automata generation
 2. Select desired rule
 
-# Concepts
+# Background
 
 ##### Cellular automata
 A cellular automaton consists of a regular grid of cells, each in one of a finite number of states, such as on and off (in contrast to a coupled map lattice). The grid can be in any finite number of dimensions. For each cell, a set of cells called its neighborhood is defined relative to the specified cell. An initial state (time t = 0) is selected by assigning a state for each cell. A new generation is created (advancing t by 1), according to some fixed rule (generally, a mathematical function) that determines the new state of each cell in terms of the current state of the cell and the states of the cells in its neighborhood. Typically, the rule for updating the state of cells is the same for each cell and does not change over time, and is applied to the whole grid simultaneously, though exceptions are known, such as the stochastic cellular automaton and asynchronous cellular automaton. [Read More
@@ -36,4 +36,4 @@ Non-deterministic music (Biles 2002), or music that cannot be repeated, for exam
 - [WolframTones](http://tones.wolfram.com/)
 
 # Contributing
-Fell free to contribute. Needs a better name (give suggestions in a issue)
+Feel free to contribute. The project also needs a better name.
