@@ -50,22 +50,29 @@
 
 	var _automata2 = _interopRequireDefault(_automata);
 
-	var _render = __webpack_require__(5);
+	var _render = __webpack_require__(2);
 
 	var _render2 = _interopRequireDefault(_render);
+
+	var _audio = __webpack_require__(3);
+
+	var _audio2 = _interopRequireDefault(_audio);
 
 	var _rules = __webpack_require__(6);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var render = new _render2.default(100, 200);
+	var render = new _render2.default(30);
 	var world = new _automata2.default(100, null, _rules.r110, render);
+
+	world.registryInterceptor('line', render.renderLine.bind(render));
+	world.registryInterceptor('line', _audio2.default);
 	world.start();
 	var speed = document.querySelector("#speed");
 
 	var timer = function timer(time) {
 	    setTimeout(function () {
-	        world.renderNextLine();
+	        world.generateLine();
 	        timer(speed.value);
 	    }, time);
 	};
@@ -73,7 +80,7 @@
 
 /***/ },
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -83,21 +90,15 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _audio = __webpack_require__(2);
-
-	var _audio2 = _interopRequireDefault(_audio);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Automata = function () {
-	    function Automata(cellsLength, linesLength, rule, render) {
+	    function Automata(cellsLength, linesLength, rule) {
 	        _classCallCheck(this, Automata);
 
 	        this.world = [];
 	        this.rule = rule;
-	        this.render = render;
+	        this.interceptors = {};
 	        this.pointer = {
 	            line: 0,
 	            cell: 0
@@ -125,43 +126,33 @@
 	        }
 	    }, {
 	        key: 'generateLine',
-	        value: function generateLine(line) {
+	        value: function generateLine() {
 	            var _this = this;
 
-	            this.world.push(this.world[line - 1].map(function (cell, i) {
-	                var right = _this.world[line - 1][i + 1] || 0;
-	                var left = _this.world[line - 1][i - 1] || 0;
+	            var linePointer = this.pointer.line++;
+	            var line = this.world[linePointer].map(function (cell, i) {
+	                var right = _this.world[linePointer][i + 1] || 0;
+	                var left = _this.world[linePointer][i - 1] || 0;
 	                return _this.rule(cell, right, left);
-	            }));
-	        }
-	    }, {
-	        key: 'renderNextLine',
-	        value: function renderNextLine() {
-	            var _this2 = this;
-
-	            if (this.pointer.line >= this.world.length) {
-	                return null;
-	            }
-
-	            (0, _audio2.default)(this.world[this.pointer.line], this.pointer.line);
-	            this.world[this.pointer.line].forEach(function () {
-	                _this2.renderNextCell();
 	            });
+	            this.executeInterceptors('line', line);
+	            this.world.push(line);
 	        }
 	    }, {
-	        key: 'renderNextCell',
-	        value: function renderNextCell() {
-	            if (this.boundaries.linesLength && this.pointer.line >= this.boundaries.linesLength) {
-	                return null;
+	        key: 'registryInterceptor',
+	        value: function registryInterceptor(event, fn) {
+	            if (!this.interceptors[event]) {
+	                this.interceptors[event] = [];
 	            }
 
-	            if (this.pointer.cell >= this.boundaries.cellsLength) {
-	                this.pointer.line++;
-	                this.generateLine(this.pointer.line);
-	                this.pointer.cell = 0;
-	            }
-
-	            return this.render.renderCell(this.pointer.cell, this.pointer.line, this.world[this.pointer.line][this.pointer.cell++]);
+	            this.interceptors[event].push(fn);
+	        }
+	    }, {
+	        key: 'executeInterceptors',
+	        value: function executeInterceptors(event, value) {
+	            this.interceptors[event].forEach(function (fn) {
+	                return fn(value);
+	            });
 	        }
 	    }]);
 
@@ -172,6 +163,69 @@
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var CANVAS_SELECTOR = '#world';
+	var CELL_HEIGHT = 10;
+	var CELL_WIDTH = 10;
+
+	var Render = function () {
+	    function Render(lines) {
+	        _classCallCheck(this, Render);
+
+	        this.worldCanvas = document.querySelector(CANVAS_SELECTOR);
+	        this.ctx = this.worldCanvas.getContext('2d');
+	        this.linePointer = 0;
+	        this.totalLines = lines;
+	    }
+
+	    _createClass(Render, [{
+	        key: 'renderLine',
+	        value: function renderLine(line) {
+	            var _this = this;
+
+	            if (this.linePointer > this.totalLines) {
+	                this.shiftContext.call(this, this.worldCanvas.width, this.worldCanvas.height, 0, -CELL_WIDTH);
+	                this.linePointer = this.totalLines - 1;
+	            }
+
+	            line.forEach(function (value, cell) {
+
+	                _this.ctx.fillStyle = value ? '#000' : '#FFF';
+	                _this.ctx.fillRect(cell * CELL_WIDTH, _this.linePointer * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
+	            });
+	            this.linePointer++;
+	        }
+	    }, {
+	        key: 'shiftContext',
+	        value: function shiftContext(w, h, dx, dy) {
+	            var clamp = function clamp(high, value) {
+	                return Math.max(0, Math.min(high, value));
+	            };
+	            var imageData = this.ctx.getImageData(clamp(w, -dx), clamp(h, -dy), clamp(w, w - dx), clamp(h, h - dy));
+
+	            this.ctx.clearRect(0, 0, w, h);
+	            this.ctx.putImageData(imageData, 0, 0);
+	        }
+	    }]);
+
+	    return Render;
+	}();
+
+	exports.default = Render;
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -180,11 +234,11 @@
 	    value: true
 	});
 
-	var _minor = __webpack_require__(3);
+	var _minor = __webpack_require__(4);
 
 	var _minor2 = _interopRequireDefault(_minor);
 
-	var _chord = __webpack_require__(4);
+	var _chord = __webpack_require__(5);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -214,7 +268,7 @@
 	exports.default = playNote;
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -227,7 +281,7 @@
 	exports.default = scales;
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -240,45 +294,6 @@
 	};
 
 	exports.triad = triad;
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var CANVAS_SELECTOR = '#world';
-
-	var Render = function () {
-	    function Render(cells, lines) {
-	        _classCallCheck(this, Render);
-
-	        this.worldCanvas = document.querySelector(CANVAS_SELECTOR);
-	        this.ctx = this.worldCanvas.getContext('2d');
-	        this.cellWidth = this.worldCanvas.width / cells;
-	        this.cellHeight = this.worldCanvas.width / lines;
-	    }
-
-	    _createClass(Render, [{
-	        key: 'renderCell',
-	        value: function renderCell(cell, line, value) {
-	            this.ctx.fillStyle = value ? '#000' : '#FFF';
-	            this.ctx.fillRect(cell * this.cellWidth, line * this.cellHeight, this.cellWidth, this.cellWidth);
-	        }
-	    }]);
-
-	    return Render;
-	}();
-
-	exports.default = Render;
 
 /***/ },
 /* 6 */
